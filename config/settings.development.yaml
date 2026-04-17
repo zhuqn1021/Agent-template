@@ -1,0 +1,9 @@
+# 开发环境覆盖配置
+log_level: "DEBUG"
+
+llm:
+  temperature: 0.8
+
+server:
+  debug: true
+  port: 8000
