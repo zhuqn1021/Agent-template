@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 from config.loader import get_settings
-from llm import LLMFactory
+from llm import create_llm
 from memory import LocalMemory
 from agents import ChatAgent
 from utils.logger import get_logger
@@ -36,16 +36,16 @@ app.add_middleware(
 )
 
 # ---------- 全局组件 ----------
-llm = LLMFactory.create(
-    provider=settings.llm.provider,
-    model=settings.llm.model,
-    api_key=settings.llm.api_key,
-    base_url=settings.llm.base_url,
-    temperature=settings.llm.temperature,
-    max_tokens=settings.llm.max_tokens,
-)
+llm = create_llm({
+    "provider": settings.llm.provider,
+    "model": settings.llm.model,
+    "api_key": settings.llm.api_key,
+    "base_url": settings.llm.base_url,
+    "temperature": settings.llm.temperature,
+    "max_tokens": settings.llm.max_tokens,
+})
 
-memory = LocalMemory(max_history=settings.memory.max_history)
+memory = LocalMemory(max_messages=settings.memory.max_history)
 
 agent = ChatAgent(
     llm=llm,
@@ -89,12 +89,12 @@ async def switch_model(provider: str, model: str, api_key: str, base_url: Option
     """运行时切换模型"""
     global llm
     try:
-        new_llm = LLMFactory.create(
-            provider=provider,
-            model=model,
-            api_key=api_key,
-            base_url=base_url,
-        )
+        new_llm = create_llm({
+            "provider": provider,
+            "model": model,
+            "api_key": api_key,
+            "base_url": base_url,
+        })
         agent.llm = new_llm
         llm = new_llm
         logger.info(f"模型已切换: {provider}/{model}")
